@@ -4,7 +4,7 @@ import math
 import os
 import tempfile
 import zipfile
-from xml.sax.saxutils import escape
+from html import escape
 from .localization import translate_text
 
 
@@ -24,7 +24,9 @@ def _cell_xml(reference, value, style):
         value = "はい" if value else "いいえ"
     if isinstance(value, (int, float)) and math.isfinite(float(value)):
         return '<c r="{}"{}><v>{}</v></c>'.format(reference, style_attr, value)
-    text = escape(str(value))
+    # The workbook is assembled as XML text; escape untrusted cell values as
+    # XML text nodes. This is output encoding, not XML parsing.
+    text = escape(str(value), quote=False)
     return (
         '<c r="{}" t="inlineStr"{}><is><t xml:space="preserve">'
         '{}</t></is></c>'

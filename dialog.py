@@ -55,58 +55,24 @@ def _localized_row(row):
         return row
     return {translate_text(key, "en"): _localized_value(value) for key, value in row.items()}
 
-try:
-    MESSAGE_YES = QMessageBox.StandardButton.Yes
-    MESSAGE_NO = QMessageBox.StandardButton.No
-except AttributeError:
-    MESSAGE_YES = QMessageBox.Yes
-    MESSAGE_NO = QMessageBox.No
-
-
-# PyQt5 (QGIS 3) and PyQt6 (QGIS 4) expose Qt enum members differently.
-try:
-    RICH_TEXT_FORMAT = Qt.TextFormat.RichText
-except AttributeError:
-    RICH_TEXT_FORMAT = Qt.RichText
-
-try:
-    EXCLUDE_USER_INPUT_EVENTS = QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
-except AttributeError:
-    EXCLUDE_USER_INPUT_EVENTS = QEventLoop.ExcludeUserInputEvents
-
-# QGIS 4 uses scoped QMetaType and Qgis enums. QGIS 3.28+ also exposes these
-# enums, while the older names below keep the declared minimum version usable.
-try:
-    FIELD_STRING = QMetaType.Type.QString
-    FIELD_DOUBLE = QMetaType.Type.Double
-except AttributeError:
-    try:
-        FIELD_STRING = QMetaType.QString
-        FIELD_DOUBLE = QMetaType.Double
-    except AttributeError:
-        from qgis.PyQt.QtCore import QVariant
-        FIELD_STRING = QVariant.String
-        FIELD_DOUBLE = QVariant.Double
-
-try:
-    LINE_WKB_TYPE = Qgis.WkbType.LineString
-except AttributeError:
-    LINE_WKB_TYPE = QgsWkbTypes.LineString
-
-try:
-    POINT_WKB_TYPE = Qgis.WkbType.Point
-except AttributeError:
-    POINT_WKB_TYPE = QgsWkbTypes.Point
-
-try:
-    MULTILINE_WKB_TYPE = Qgis.WkbType.MultiLineString
-except AttributeError:
-    MULTILINE_WKB_TYPE = QgsWkbTypes.MultiLineString
-
-try:
-    MULTIPOLYGON_WKB_TYPE = Qgis.WkbType.MultiPolygon
-except AttributeError:
-    MULTIPOLYGON_WKB_TYPE = QgsWkbTypes.MultiPolygon
+# QGIS 3.28+ supports scoped Qt and QGIS enums; QGIS 4 requires them.
+MESSAGE_YES = QMessageBox.StandardButton.Yes
+MESSAGE_NO = QMessageBox.StandardButton.No
+RICH_TEXT_FORMAT = Qt.TextFormat.RichText
+EXCLUDE_USER_INPUT_EVENTS = QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
+FIELD_STRING = QMetaType.Type.QString
+FIELD_DOUBLE = QMetaType.Type.Double
+LINE_WKB_TYPE = Qgis.WkbType.LineString
+POINT_WKB_TYPE = Qgis.WkbType.Point
+MULTILINE_WKB_TYPE = Qgis.WkbType.MultiLineString
+MULTIPOLYGON_WKB_TYPE = Qgis.WkbType.MultiPolygon
+LINE_GEOMETRY_TYPE = Qgis.GeometryType.Line
+POINT_GEOMETRY_TYPE = Qgis.GeometryType.Point
+POLYGON_GEOMETRY_TYPE = Qgis.GeometryType.Polygon
+NO_GEOMETRY_FLAG = Qgis.FeatureRequestFlag.NoGeometry
+DISTANCE_METERS = Qgis.DistanceUnit.Meters
+WRITER_ACTION = QgsVectorFileWriter.ActionOnExistingFile
+WRITER_ERROR = QgsVectorFileWriter.WriterError
 
 PREFECTURE_ORDER = (
     "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
@@ -138,26 +104,6 @@ ROAD_TYPE_DISPLAY = {
     "合計": "全道路種別｜合計",
     "指定市の一般市道": "市道｜指定市の一般市道",
 }
-
-try:
-    LINE_GEOMETRY_TYPE = Qgis.GeometryType.Line
-    POINT_GEOMETRY_TYPE = Qgis.GeometryType.Point
-    POLYGON_GEOMETRY_TYPE = Qgis.GeometryType.Polygon
-except AttributeError:
-    LINE_GEOMETRY_TYPE = QgsWkbTypes.LineGeometry
-    POINT_GEOMETRY_TYPE = QgsWkbTypes.PointGeometry
-    POLYGON_GEOMETRY_TYPE = QgsWkbTypes.PolygonGeometry
-
-try:
-    NO_GEOMETRY_FLAG = Qgis.FeatureRequestFlag.NoGeometry
-except AttributeError:
-    NO_GEOMETRY_FLAG = QgsFeatureRequest.NoGeometry
-
-try:
-    DISTANCE_METERS = Qgis.DistanceUnit.Meters
-except AttributeError:
-    DISTANCE_METERS = QgsUnitTypes.DistanceUnit.Meters
-
 
 SPEED_PRESETS = {
     "walk_adult": {
@@ -589,12 +535,8 @@ class AccessibilityDialog(QDialog):
         self.catchment_limit_combo.currentIndexChanged.connect(self.update_catchment_limit_unit)
         self._load_layers()
         form = QFormLayout()
-        try:
-            form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
-            form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        except AttributeError:
-            form.setRowWrapPolicy(QFormLayout.WrapLongRows)
-            form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+        form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         compact_combos = (
             self.layer_combo, self.analysis_mode_combo, self.catchment_limit_combo,
             self.catchment_mode_combo, self.origin_layer_combo,
@@ -607,10 +549,7 @@ class AccessibilityDialog(QDialog):
             self.car_census_road_combo, self.car_census_period_combo,
             self.car_census_area_combo,
         )
-        try:
-            combo_policy = QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
-        except AttributeError:
-            combo_policy = QComboBox.AdjustToMinimumContentsLengthWithIcon
+        combo_policy = QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
         for combo in compact_combos:
             combo.setMinimumContentsLength(12)
             combo.setSizeAdjustPolicy(combo_policy)
@@ -693,10 +632,7 @@ class AccessibilityDialog(QDialog):
         content_layout.addWidget(note)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        try:
-            scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        except AttributeError:
-            scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(content)
         layout = QVBoxLayout(self)
         language_row = QHBoxLayout()
@@ -1934,30 +1870,19 @@ class AccessibilityDialog(QDialog):
     def _choose_unvisited_action(self, unvisited_count, destination_count):
         box = QMessageBox(self)
         box.setWindowTitle(self._text("未訪問先があります"))
-        try:
-            warning_icon = QMessageBox.Icon.Warning
-        except AttributeError:
-            warning_icon = QMessageBox.Warning
+        warning_icon = QMessageBox.Icon.Warning
         box.setIcon(warning_icon)
         box.setText(self._text(
             "全訪問先巡回の計算で、未訪問先が{}件残りました（全{}件）。\n"
             "このまま結果を出力するか、設定を自動調整しますか？"
         ).format(unvisited_count, destination_count))
-        try:
-            accept_role = QMessageBox.ButtonRole.AcceptRole
-            action_role = QMessageBox.ButtonRole.ActionRole
-            reject_role = QMessageBox.ButtonRole.RejectRole
-        except AttributeError:
-            accept_role = QMessageBox.AcceptRole
-            action_role = QMessageBox.ActionRole
-            reject_role = QMessageBox.RejectRole
+        accept_role = QMessageBox.ButtonRole.AcceptRole
+        action_role = QMessageBox.ButtonRole.ActionRole
+        reject_role = QMessageBox.ButtonRole.RejectRole
         save_button = box.addButton(self._text("現在の設定で出力"), accept_role)
         adjust_button = box.addButton(self._text("設定を自動調整して全訪問先を回る"), action_role)
         box.addButton(self._text("キャンセル"), reject_role)
-        try:
-            box.exec()
-        except AttributeError:
-            box.exec_()
+        box.exec()
         if box.clickedButton() is save_button:
             return "save"
         if box.clickedButton() is adjust_button:
@@ -2048,14 +1973,8 @@ class AccessibilityDialog(QDialog):
             self._apply_language(dialog)
         run_button.clicked.connect(dialog.accept)
         cancel_button.clicked.connect(dialog.reject)
-        try:
-            accepted = dialog.exec()
-        except AttributeError:
-            accepted = dialog.exec_()
-        try:
-            accepted_value = QDialog.DialogCode.Accepted
-        except AttributeError:
-            accepted_value = QDialog.Accepted
+        accepted = dialog.exec()
+        accepted_value = QDialog.DialogCode.Accepted
         if accepted != accepted_value:
             return None
         enabled = []
@@ -2264,7 +2183,7 @@ class AccessibilityDialog(QDialog):
             result = QgsVectorFileWriter.writeAsVectorFormatV3(
                 memory, str(gpkg_path), QgsProject.instance().transformContext(), options
             )
-            if result[0] != QgsVectorFileWriter.NoError:
+            if result[0] != WRITER_ERROR.NoError:
                 raise ValueError("巡回計画レイヤを書き込めませんでした：{}".format(result[1]))
             saved = QgsVectorLayer(
                 "{}|layername={}".format(gpkg_path, output_name), output_name, "ogr"
@@ -2277,16 +2196,26 @@ class AccessibilityDialog(QDialog):
         if line_rows:
             saved_lines = write_layer(
                 line_rows, line_geometries, "LineString", line_name,
-                QgsVectorFileWriter.CreateOrOverwriteFile,
+                WRITER_ACTION.CreateOrOverwriteFile,
             )
             self._apply_origin_catchment_style(saved_lines)
         else:
             self._log("訪問可能なチーム経路がないため、経路ラインは作成しませんでした。")
         saved_stops = write_layer(
             detail_rows, stop_geometries, "Point", stop_name,
-            (QgsVectorFileWriter.CreateOrOverwriteLayer if line_rows
-             else QgsVectorFileWriter.CreateOrOverwriteFile),
+            (WRITER_ACTION.CreateOrOverwriteLayer if line_rows
+             else WRITER_ACTION.CreateOrOverwriteFile),
         )
+
+    @staticmethod
+    def _graph_node_id(point, merge_tolerance, node_ids, node_xy, adjacency):
+        key = (int(round(point.x() / merge_tolerance)), int(round(point.y() / merge_tolerance)))
+        if key not in node_ids:
+            node_id = len(node_xy)
+            node_ids[key] = node_id
+            node_xy.append(QgsPointXY(point))
+            adjacency.append([])
+        return node_ids[key]
 
     def _build_graph(
         self, network_layer, progress_callback=None, merge_tolerance=0.1,
@@ -2296,15 +2225,6 @@ class AccessibilityDialog(QDialog):
         node_xy = []
         adjacency = []
         edge_count = 0
-
-        def node_id(point):
-            key = (int(round(point.x() / merge_tolerance)), int(round(point.y() / merge_tolerance)))
-            if key not in node_ids:
-                idx = len(node_xy)
-                node_ids[key] = idx
-                node_xy.append(QgsPointXY(point))
-                adjacency.append([])
-            return node_ids[key]
 
         total_features = network_layer.featureCount()
         request = QgsFeatureRequest()
@@ -2349,7 +2269,8 @@ class AccessibilityDialog(QDialog):
                 if len(part) < 2:
                     continue
                 for a, b in zip(part[:-1], part[1:]):
-                    u, v = node_id(a), node_id(b)
+                    u = self._graph_node_id(a, merge_tolerance, node_ids, node_xy, adjacency)
+                    v = self._graph_node_id(b, merge_tolerance, node_ids, node_xy, adjacency)
                     if u == v:
                         continue
                     length_m = math.hypot(b.x() - a.x(), b.y() - a.y())
@@ -2753,12 +2674,12 @@ class AccessibilityDialog(QDialog):
         # _unique_output_paths()で未作成の新規ファイル名を確保しているため、
         # GeoPackageファイル自体を新規作成する。CreateOrOverwriteLayerは
         # 存在しないGPKGを更新モードで開こうとして、OGRエラーになるQGIS環境がある。
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteFile
         writer = QgsVectorFileWriter.create(
             str(gpkg_path), fields, LINE_WKB_TYPE, network.crs(),
             QgsProject.instance().transformContext(), options,
         )
-        if writer is None or writer.hasError() != QgsVectorFileWriter.NoError:
+        if writer is None or writer.hasError() != WRITER_ERROR.NoError:
             message = writer.errorMessage() if writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("結果GeoPackageを作成できません：{}".format(message))
 
@@ -2975,10 +2896,14 @@ class AccessibilityDialog(QDialog):
         if min(id_field, layer_field, length_field) < 0:
             raise ValueError("区間明細に集約に必要な属性がありません。")
         try:
-            detail_layer.dataProvider().createAttributeIndex(id_field)
-        except Exception:
-            # Providerによって属性索引作成に対応しない場合も、正確性を優先して続行する。
-            pass
+            index_created = detail_layer.dataProvider().createAttributeIndex(id_field)
+        except Exception as exc:
+            index_created = False
+            index_error = str(exc)
+        else:
+            index_error = "Providerが索引を作成できませんでした。"
+        if not index_created:
+            self._log("起点別集約用の属性索引を作成できません。全件走査で続行します：{}".format(index_error))
 
         aggregate_columns = [
             ("run_datetime", FIELD_STRING), ("catchment_mode", FIELD_STRING),
@@ -3005,12 +2930,12 @@ class AccessibilityDialog(QDialog):
         options.driverName = "GPKG"
         options.layerName = layer_name
         options.fileEncoding = "UTF-8"
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteLayer
         writer = QgsVectorFileWriter.create(
             str(gpkg_file), fields, MULTILINE_WKB_TYPE, network.crs(),
             QgsProject.instance().transformContext(), options,
         )
-        if writer is None or writer.hasError() != QgsVectorFileWriter.NoError:
+        if writer is None or writer.hasError() != WRITER_ERROR.NoError:
             message = writer.errorMessage() if writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("起点別集約レイヤをGeoPackageに作成できません：{}".format(message))
 
@@ -3163,12 +3088,12 @@ class AccessibilityDialog(QDialog):
         options.driverName = "GPKG"
         options.layerName = layer_name
         options.fileEncoding = "UTF-8"
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteLayer
         writer = QgsVectorFileWriter.create(
             str(gpkg_file), fields, MULTILINE_WKB_TYPE, network.crs(),
             QgsProject.instance().transformContext(), options,
         )
-        if writer is None or writer.hasError() != QgsVectorFileWriter.NoError:
+        if writer is None or writer.hasError() != WRITER_ERROR.NoError:
             message = writer.errorMessage() if writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("統合到達圏レイヤを作成できません：{}".format(message))
         try:
@@ -3230,12 +3155,12 @@ class AccessibilityDialog(QDialog):
         options.driverName = "GPKG"
         options.layerName = hull_name
         options.fileEncoding = "UTF-8"
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteLayer
         hull_writer = QgsVectorFileWriter.create(
             str(gpkg_file), hull_fields, MULTIPOLYGON_WKB_TYPE, network.crs(),
             QgsProject.instance().transformContext(), options,
         )
-        if hull_writer is None or hull_writer.hasError() != QgsVectorFileWriter.NoError:
+        if hull_writer is None or hull_writer.hasError() != WRITER_ERROR.NoError:
             message = hull_writer.errorMessage() if hull_writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("帰属先別凸包レイヤを作成できません：{}".format(message))
         try:
@@ -3325,12 +3250,12 @@ class AccessibilityDialog(QDialog):
         options.driverName = "GPKG"
         options.layerName = origin_hull_name
         options.fileEncoding = "UTF-8"
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteLayer
         writer = QgsVectorFileWriter.create(
             str(gpkg_file), hull_fields, MULTIPOLYGON_WKB_TYPE, crs,
             QgsProject.instance().transformContext(), options,
         )
-        if writer is None or writer.hasError() != QgsVectorFileWriter.NoError:
+        if writer is None or writer.hasError() != WRITER_ERROR.NoError:
             message = writer.errorMessage() if writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("起点別凸包レイヤを作成できません：{}".format(message))
 
@@ -3387,12 +3312,12 @@ class AccessibilityDialog(QDialog):
         options.driverName = "GPKG"
         options.layerName = merged_name
         options.fileEncoding = "UTF-8"
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteLayer
         writer = QgsVectorFileWriter.create(
             str(gpkg_file), merged_fields, MULTIPOLYGON_WKB_TYPE, crs,
             QgsProject.instance().transformContext(), options,
         )
-        if writer is None or writer.hasError() != QgsVectorFileWriter.NoError:
+        if writer is None or writer.hasError() != WRITER_ERROR.NoError:
             message = writer.errorMessage() if writer is not None else "GeoPackage writerを作成できませんでした。"
             raise ValueError("融合凸包レイヤを作成できません：{}".format(message))
         try:
@@ -4009,10 +3934,7 @@ class AccessibilityDialog(QDialog):
                 "ELSE format_number(\"estimated_time_min\" / 60.0, 1) || '{}' END"
             ).format(minute_unit, hour_unit)
             settings.isExpression = True
-            try:
-                settings.placement = Qgis.LabelPlacement.Line
-            except AttributeError:
-                settings.placement = QgsPalLayerSettings.Line
+            settings.placement = QgsPalLayerSettings.Placement.Line
             text_format = QgsTextFormat()
             text_format.setSize(9)
             text_format.setColor(QColor("#ffffff"))
@@ -4066,11 +3988,11 @@ class AccessibilityDialog(QDialog):
         options.fileEncoding = "UTF-8"
         # 出力先は未作成の一意なGPKGファイルなので、レイヤ上書きではなく
         # ファイル新規作成を指定する。
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile
+        options.actionOnExistingFile = WRITER_ACTION.CreateOrOverwriteFile
         result = QgsVectorFileWriter.writeAsVectorFormatV3(
             memory_layer, str(target_path), QgsProject.instance().transformContext(), options
         )
-        if result[0] != QgsVectorFileWriter.NoError:
+        if result[0] != WRITER_ERROR.NoError:
             raise ValueError("結果GeoPackageを書き込めませんでした：{}".format(result[1]))
 
         saved_layer = QgsVectorLayer(
