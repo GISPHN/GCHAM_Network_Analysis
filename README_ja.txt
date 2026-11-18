@@ -1,4 +1,4 @@
-G-CHAM Network Analysis 0.4.11
+G-CHAM Network Analysis 0.4.12
 
 概要
 既存の道路ラインと起点・目的地ポイントから、最短距離ルートを作成し、選択速度から所要時間の参考値を算出します。時間最短ルートではありません。解析結果はCSVとGeoPackageへ保存し、GeoPackageのルートレイヤをQGISプロジェクトに追加します。
@@ -90,7 +90,7 @@ QGIS 3.28以降とQGIS 4系を対象とします。プラグイン管理画面�
 
 インストール
 1. QGISの「プラグイン」→「プラグインの管理とインストール」→「ZIPからインストール」を開きます。
-2. GCHAM_Network_Analysis_0.4.11.zip を選択します。
+2. GCHAM_Network_Analysis_0.4.12.zip を選択します。
 3. プラグインを有効化し、プラグインメニュー直下またはツールバーの「G-CHAM Network Analysis」を開きます。
 
 入力条件
